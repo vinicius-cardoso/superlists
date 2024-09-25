@@ -1,19 +1,24 @@
+from django.test import LiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 import time
-import unittest
 
-class NewVisitorTest(unittest.TestCase):
+class NewVisitorTest(LiveServerTestCase):
     def setUp(self):
         self.browser = webdriver.Firefox()
 
     def tearDown(self):
         self.browser.quit()
 
+    def check_for_row_in_list_table(self, row_text):
+        table = self.browser.find_element('id', 'id_list_table')
+        rows = table.find_elements('tag name', 'tr')
+        self.assertIn(row_text, [row.text for row in rows])
+
     def test_can_start_a_list_and_retrieve_it_later(self):
         # Edith ouviu falar de uma nova aplicação online interessante
         # para lista de tarefas. Ela decide verificar sua homepage
-        self.browser.get('http://localhost:8000')
+        self.browser.get(self.live_server_url)
 
         # Ela percebe que o título da página e o cabeçalho mencionam
         # listas de tarefas (to-do)
@@ -32,10 +37,7 @@ class NewVisitorTest(unittest.TestCase):
         # "1: Buy peacock feathers" como um item em uma lista de tarefas
         inputbox.send_keys(Keys.ENTER)
         time.sleep(1)
-        
-        table = self.browser.find_element('id', 'id_list_table')
-        rows = table.find_elements('tag name', 'tr')
-        self.assertIn('1: Buy peacock feathers', [row.text for row in rows])
+        self.check_for_row_in_list_table('1: Buy peacockfeathers')
 
         # Ainda continua havendo uma caixa de texto convidando-a a acrescentar
         # outro item. Ela insere "Use peacock feathers to make a fly"
@@ -45,14 +47,9 @@ class NewVisitorTest(unittest.TestCase):
         inputbox.send_keys(Keys.ENTER)
         time.sleep(1)
 
-        # A página é atualizada novamente e agora mostra osdois itens em sua lista
-        table = self.browser.find_element('id', 'id_list_table')
-        rows = table.find_elements('tag name', 'tr')
-        self.assertIn('1: Buy peacock feathers', [row.text for row in rows])
-        self.assertIn(
-            '2: Use peacock feathers to make a fly',
-            [row.text for row in rows]
-        )
+        # A página é atualizada novamente e agora mostra os dois itens em sua lista
+        self.check_for_row_in_list_table('1: Buy peacock feathers')
+        self.check_for_row_in_list_table('2: Use peacock feathers to make a fly')
 
         # Edith se pergunta se o site lembrará de sua lista. Então ela nota
         # que o site gerou um URL único para ela -- há um pequeno
@@ -60,7 +57,3 @@ class NewVisitorTest(unittest.TestCase):
         self.fail('Finish the test!')
 
         # Ela acessa esse URL – sua lista de tarefas continua lá.
-
-
-if __name__ == '__main__':
-    unittest.main(warnings='ignore')
