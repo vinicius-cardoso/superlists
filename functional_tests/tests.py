@@ -1,5 +1,5 @@
 from tkinter.tix import MAX
-from django.test import LiveServerTestCase
+from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 import time
@@ -7,7 +7,7 @@ from selenium.common.exceptions import WebDriverException
 
 MAX_WAIT = 10
 
-class NewVisitorTest(LiveServerTestCase):
+class NewVisitorTest(StaticLiveServerTestCase):
     def setUp(self):
         self.browser = webdriver.Firefox()
 
@@ -60,14 +60,13 @@ class NewVisitorTest(LiveServerTestCase):
 
         # A página é atualizada novamente e agora mostra os dois itens em sua lista
         self.wait_for_row_in_list_table('2: Use peacock feathers to make a fly')
-        self.wait_for_row_in_list_table('1: Buy peacockfeathers')
+        self.wait_for_row_in_list_table('1: Buy peacock feathers')
 
         # Satisfeita, ela volta a dormir
 
         # Edith se pergunta se o site lembrará de sua lista. Então ela nota
         # que o site gerou um URL único para ela -- há um pequeno
         # texto explicativo para isso.
-        self.fail('Finish the test!')
 
         # Ela acessa esse URL – sua lista de tarefas continua lá.
 
@@ -92,7 +91,7 @@ class NewVisitorTest(LiveServerTestCase):
         
         # Francis acessa a página inicial. Não há nenhum sinal da lista de Edith
         self.browser.get(self.live_server_url)
-        page_text = self.browser.find_element('tag', 'body').text
+        page_text = self.browser.find_element('tag name', 'body').text
         self.assertNotIn('Buy peacock feathers', page_text)
         self.assertNotIn('make a fly', page_text)
         
@@ -109,7 +108,7 @@ class NewVisitorTest(LiveServerTestCase):
         self.assertNotEqual(francis_list_url, edith_list_url)
         
         # Novamente, não há nenhum sinal da lista de Edith
-        page_text = self.browser.find_element('tag', 'body').text
+        page_text = self.browser.find_element('tag name', 'body').text
         self.assertNotIn('Buy peacock feathers', page_text)
         self.assertIn('Buy milk', page_text)
 
@@ -121,7 +120,7 @@ class NewVisitorTest(LiveServerTestCase):
         self.browser.set_window_size(1024, 768)
 
         # Ela percebe que a caixa de entrada está elegantemente centralizada
-        inputbox = self.browser.find_element_by_id('id_new_item')
+        inputbox = self.browser.find_element('id', 'id_new_item')
         self.assertAlmostEqual(inputbox.location['x'] + inputbox.size['width'] / 2, 512, delta=10)
 
         # Ela inicia uma nova lista e vê que a entrada está elegantemente
@@ -129,6 +128,6 @@ class NewVisitorTest(LiveServerTestCase):
         inputbox.send_keys('testing')
         inputbox.send_keys(Keys.ENTER)
         self.wait_for_row_in_list_table('1: testing')
-        inputbox = self.browser.find_element_by_id('id_new_item')
+        inputbox = self.browser.find_element('id', 'id_new_item')
         self.assertAlmostEqual(
         inputbox.location['x'] + inputbox.size['width'] / 2, 512, delta=10)
